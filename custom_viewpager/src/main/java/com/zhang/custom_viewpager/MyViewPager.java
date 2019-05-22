@@ -9,6 +9,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Scroller;
 
 /**
  * 自定义ViewPager
@@ -27,6 +28,9 @@ public class MyViewPager extends ViewGroup {
      */
     private int currentIndex;
 
+    private MyScroller mScroller;//自己写的
+//    private Scroller mScroller;//系统的
+
     /**
      * 构造方法
      *
@@ -39,6 +43,9 @@ public class MyViewPager extends ViewGroup {
     }
 
     private void initView(Context context) {
+        mScroller = new MyScroller();
+//        mScroller = new Scroller(context);
+
         //实例化手势识别器
         mDetector = new GestureDetector(context, new MyGestureListener());
     }
@@ -95,8 +102,24 @@ public class MyViewPager extends ViewGroup {
         //把过滤后的值赋值给当前页面下标
         currentIndex = tempIndex;
 
-        scrollTo(currentIndex * getWidth(),0);
+//        scrollTo(currentIndex * getWidth(),0);
 
+        int distanceX = currentIndex*getWidth() - getScrollX();
+
+        mScroller.startScroll(getScrollX(),getScrollY(),distanceX,0);
+
+        invalidate();//这个方法会导致onDraw()和computeScroll()执行
+
+    }
+
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (mScroller.computeScrollOffset()) {
+            float currentX = mScroller.getCurrX();
+            scrollTo((int) currentX,0);
+            invalidate();
+        }
     }
 
     class MyGestureListener implements GestureDetector.OnGestureListener {
@@ -126,6 +149,10 @@ public class MyViewPager extends ViewGroup {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 //            scrollBy((int) distanceX, (int) distanceY);//这样可以同时在X轴和Y轴滑动
+            //限制第一页和最后一页不能滑动
+            if (currentIndex == 0 || currentIndex == getChildCount() - 1) {
+                return false;
+            }
             scrollBy((int) distanceX, 0);//只能在X轴滑动
 
             return true;//自己处理滑动事件
