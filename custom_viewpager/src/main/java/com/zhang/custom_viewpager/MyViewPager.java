@@ -4,6 +4,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -12,8 +15,135 @@ import android.view.ViewGroup;
  */
 public class MyViewPager extends ViewGroup {
 
+    /**
+     * 手势识别器
+     * 1，定义出来
+     * 2，实例化--重写想要的方法
+     * 3，在onTouchEvent()中把事件传递给手势识别器
+     */
+    private GestureDetector mDetector;
+    /**
+     * 当前页面下标位置
+     */
+    private int currentIndex;
+
+    /**
+     * 构造方法
+     *
+     * @param context
+     * @param attrs
+     */
     public MyViewPager(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        initView(context);
+    }
+
+    private void initView(Context context) {
+        //实例化手势识别器
+        mDetector = new GestureDetector(context, new MyGestureListener());
+    }
+
+    private float startX;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        //3,把事件传递给手势识别器
+        mDetector.onTouchEvent(event);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //记录坐标
+                startX = event.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+            case MotionEvent.ACTION_UP:
+                //结束坐标
+                float endX = event.getX();
+
+                //下标位置
+                int tempIndex = currentIndex;
+                if ((startX - endX) > getWidth() / 2) {
+                    //显示下一个页面
+                    tempIndex ++;
+                } else if ((endX - startX) > getWidth() / 2) {
+                    //显示上一个页面
+                    tempIndex --;
+                }
+
+                //根据下标位置移动到指定页面
+                scrollToPager(tempIndex);
+
+                break;
+            default:
+                break;
+        }
+        return true;//自己处理
+    }
+
+    /**
+     * 根据下标位置移动到指定页面 过滤非法值
+     * @param tempIndex
+     */
+    private void scrollToPager(int tempIndex) {
+        if (tempIndex < 0) {
+            tempIndex = 0;
+        }
+        if (tempIndex > getChildCount() - 1) {
+            tempIndex = getChildCount() - 1;
+        }
+        //把过滤后的值赋值给当前页面下标
+        currentIndex = tempIndex;
+
+        scrollTo(currentIndex * getWidth(),0);
+
+    }
+
+    class MyGestureListener implements GestureDetector.OnGestureListener {
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            return false;
+        }
+
+        /**
+         * @param e1
+         * @param e2
+         * @param distanceX：在X轴滑动的距离
+         * @param distanceY：在Y轴滑动的距离
+         * @return
+         */
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//            scrollBy((int) distanceX, (int) distanceY);//这样可以同时在X轴和Y轴滑动
+            scrollBy((int) distanceX, 0);//只能在X轴滑动
+
+            return true;//自己处理滑动事件
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            showLog("长按");
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
+        }
+    }
+
+    private void showLog(String msg) {
+        Log.e("===z", msg);
     }
 
     @Override
@@ -25,7 +155,7 @@ public class MyViewPager extends ViewGroup {
 //        t =  getHeight
         for (int i = 0; i < getChildCount(); i++) {
             View childView = getChildAt(i);
-            childView.layout(i * getWidth(),0,(i + 1) * getWidth(),getHeight());
+            childView.layout(i * getWidth(), 0, (i + 1) * getWidth(), getHeight());
         }
 
     }
