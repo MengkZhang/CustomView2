@@ -52,6 +52,46 @@ public class MyViewPager extends ViewGroup {
 
     private float startX;
 
+    private float eStartX;
+    private float eStartY;
+
+    /**
+     * 事件拦截方法
+     * 返回true,拦截事件，将会触发当前控件的onTouchEvent()方法
+     * 返回false，不拦截事件，事件继续传递给子View
+     *
+     * @param ev
+     * @return
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        //把事件传递给手势识别器
+        mDetector.onTouchEvent(ev);
+        boolean result = false;//默认传递事件
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                eStartX = ev.getX();
+                eStartY = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float eEndX = ev.getX();
+                float eEndY = ev.getY();
+                float distanceX = Math.abs((eEndX - eStartX));
+                float distanceY = Math.abs((eEndY - eStartY));
+                //如果X轴滑动的距离大于Y轴滑动的距离，则拦截事件
+                if (distanceX > distanceY && distanceX > 10) {
+                    result = true;
+                }
+
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
@@ -61,10 +101,13 @@ public class MyViewPager extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 //记录坐标
                 startX = event.getX();
+                showLog("ACTION_DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
+                showLog("ACTION_MOVE");
                 break;
             case MotionEvent.ACTION_UP:
+                showLog("ACTION_UP");
                 //结束坐标
                 float endX = event.getX();
 
@@ -72,10 +115,10 @@ public class MyViewPager extends ViewGroup {
                 int tempIndex = currentIndex;
                 if ((startX - endX) > getWidth() / 2) {
                     //显示下一个页面
-                    tempIndex ++;
+                    tempIndex++;
                 } else if ((endX - startX) > getWidth() / 2) {
                     //显示上一个页面
-                    tempIndex --;
+                    tempIndex--;
                 }
 
                 //根据下标位置移动到指定页面
@@ -90,6 +133,7 @@ public class MyViewPager extends ViewGroup {
 
     /**
      * 根据下标位置移动到指定页面 过滤非法值
+     *
      * @param tempIndex
      */
     private void scrollToPager(int tempIndex) {
@@ -104,9 +148,9 @@ public class MyViewPager extends ViewGroup {
 
 //        scrollTo(currentIndex * getWidth(),0);
 
-        int distanceX = currentIndex*getWidth() - getScrollX();
+        int distanceX = currentIndex * getWidth() - getScrollX();
 
-        mScroller.startScroll(getScrollX(),getScrollY(),distanceX,0);
+        mScroller.startScroll(getScrollX(), getScrollY(), distanceX, 0);
 
         invalidate();//这个方法会导致onDraw()和computeScroll()执行
 
@@ -117,7 +161,7 @@ public class MyViewPager extends ViewGroup {
         super.computeScroll();
         if (mScroller.computeScrollOffset()) {
             float currentX = mScroller.getCurrX();
-            scrollTo((int) currentX,0);
+            scrollTo((int) currentX, 0);
             invalidate();
         }
     }
@@ -185,5 +229,33 @@ public class MyViewPager extends ViewGroup {
             childView.layout(i * getWidth(), 0, (i + 1) * getWidth(), getHeight());
         }
 
+    }
+
+    /**
+     * @param widthMeasureSpec  : 包含两个属性：父类建议的宽和测量模式
+     * @param heightMeasureSpec ：父类建议的高和测量模式
+     */
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int size = MeasureSpec.getSize(widthMeasureSpec);
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        /**
+         * 测量模式有这三种
+         *         MeasureSpec.AT_MOST;       ：最大值模式，当控件宽高设置为wrap_content时
+         *         MeasureSpec.EXACTLY        ：精确值模式，当控件match_parent时
+         *         MeasureSpec.UNSPECIFIED;   ：未指定模式，View想多大就多大，通常在绘制自定义View时才会用
+         */
+
+
+        //获取下一级子View的建议宽和测量模式
+        int makeMeasureSpec = MeasureSpec.makeMeasureSpec(size, mode);
+
+        //获取子View并测量
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            child.measure(widthMeasureSpec, heightMeasureSpec);
+        }
     }
 }
