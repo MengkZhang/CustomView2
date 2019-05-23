@@ -2,6 +2,7 @@ package com.zhang.custom_viewpager;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,5 +28,9 @@ public class MainActivity extends AppCompatActivity {
             imageView.setBackgroundResource(ids[i]);
             mViewPager.addView(imageView);
         }
+
+        //添加测试页面
+        View view = View.inflate(this, R.layout.test, null);
+        mViewPager.addView(view,2);
     }
 }

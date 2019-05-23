@@ -6,3 +6,5 @@
 自定义ViewPager-滑动显示指定页面：添加手势和触摸事件
 
 自定义ViewPager-处理生硬回弹问题
+
+自定义ViewPager-添加测试页面并测量子View的宽高
