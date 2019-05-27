@@ -1,1 +1,1 @@
-include ':app', ':custom_viewpager'
+include ':app', ':custom_viewpager', ':touchevent1'
