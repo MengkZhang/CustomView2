@@ -64,20 +64,21 @@ class NetCacheUtils {
         private Bitmap downloadBitmap(String url) {
             HttpURLConnection conn = null;
             try {
-                URL url1 = new URL(url);
-                conn = (HttpURLConnection) url1.openConnection();
-                conn.setRequestMethod("GET");
+                conn = (HttpURLConnection) new URL(url).openConnection();
                 conn.setReadTimeout(5000);
                 conn.setConnectTimeout(5000);
+                conn.setRequestMethod("GET");
 
                 int code = conn.getResponseCode();
                 if (code == 200) {
                     InputStream inputStream = conn.getInputStream();
                     //压缩图片
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 2;//宽高为原来的1/2
-                    options.inPreferredConfig = Bitmap.Config.ARGB_4444;
+                    options.inSampleSize = 1;//宽高为原来的1/2
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream,null,options);
+
+                    Log.e("===z",bitmap + "");
                     return bitmap;
                 }
             } catch (MalformedURLException e) {

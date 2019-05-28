@@ -3,6 +3,7 @@ package com.zhang.piclrucache;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.util.Base64;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,9 +22,10 @@ class LocalCacheUtils {
      * @param bitmap
      */
     public void setBitmapToLocal(String url, Bitmap bitmap) {
-        String fileName = url;//把图片的url当做文件名,并进行MD5加密
+//        String fileName = url;//把图片的url当做文件名,并进行MD5加密
+        String fileName = Base64.encodeToString(url.getBytes(), Base64.DEFAULT);
         try {
-            File file = new File(CACHE_PATH,fileName);
+            File file = new File(CACHE_PATH, fileName);
             //通过得到文件的父文件,判断父文件是否存在
             File parentFile = file.getParentFile();
             if (!parentFile.exists()) {
@@ -39,12 +41,13 @@ class LocalCacheUtils {
     }
 
     public Bitmap getBitmapFromLocal(String url) {
-        String fileName = url;//把图片的url当做文件名,并进行MD5加密
+//        String fileName = url;//把图片的url当做文件名,并进行MD5加密
+        String fileName = Base64.encodeToString(url.getBytes(), Base64.DEFAULT);
         try {
-            File file=new File(CACHE_PATH,fileName);
-            Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+            File file = new File(CACHE_PATH, fileName);
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             return bitmap;
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

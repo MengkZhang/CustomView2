@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mImageView = findViewById(R.id.image_view);
-        String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558982301130&di=0d4e5339c6a5fec0905dae878b584ab6&imgtype=0&src=http%3A%2F%2Ff.hiphotos.baidu.com%2Fzhidao%2Fpic%2Fitem%2F472309f7905298221724db82d5ca7bcb0a46d458.jpg";
+        String url = "https://upload-images.jianshu.io/upload_images/5914881-8e0f627c5963bd0d.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp";
         MyBitmapUtils bitmapUtils = new MyBitmapUtils();
         bitmapUtils.display(mImageView,url);
     }
